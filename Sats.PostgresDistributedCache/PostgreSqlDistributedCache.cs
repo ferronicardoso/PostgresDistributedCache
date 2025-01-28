@@ -4,8 +4,6 @@ using Npgsql;
 
 namespace Sats.PostgresDistributedCache
 {
-
-
     public class PostgreSqlDistributedCache : IDistributedCache
     {
         private readonly string _connectionString;
