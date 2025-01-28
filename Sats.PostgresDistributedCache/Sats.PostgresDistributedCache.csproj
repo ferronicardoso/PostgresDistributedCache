@@ -5,19 +5,22 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Sats.PostgresDistributedCache</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.2.0</Version>
     <Authors>satsvelke</Authors>
     <Description>A PostgreSQL-based distributed cache implementation for .NET applications.</Description>
     <PackageTags>PostgreSQL, Distributed Cache, .NET</PackageTags>
     <RepositoryUrl>https://github.com/satsvelke/PostgresDistributedCache</RepositoryUrl>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
     <PackageReference Include="Npgsql" Version="4.1.0" />
   </ItemGroup>
 
-
-   <ItemGroup>
-    <None Include="readme.md" Pack="true" PackagePath="../" />
+  <ItemGroup>
+    <!-- Include LICENSE.txt and README.md in the NuGet package -->
+    <None Include="LICENSE.txt" Pack="true" PackagePath="/" />
+    <None Include="README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 </Project>
