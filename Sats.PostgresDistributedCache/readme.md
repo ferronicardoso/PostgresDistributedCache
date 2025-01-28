@@ -12,6 +12,8 @@ dotnet add package Sats.PostgresDistributedCache --version 1.2.0
 
 Alternatively, you can use the NuGet Package Manager in Visual Studio.
 
+[![NuGet Badge](https://img.shields.io/nuget/v/Sats.PostgresDistributedCache.svg)](https://www.nuget.org/packages/Sats.PostgresDistributedCache/)
+
 ## Usage
 
 1. **Configuration**: In your `Startup.cs` or `Program.cs` (depending on your .NET version), configure the PostgreSQL distributed cache:
@@ -90,4 +92,9 @@ Make sure your project is targeting one of these versions to use `Sats.PostgresD
 ## License
 
 This package is licensed under the MIT License.
+
+## Links
+
+- [NuGet Package](https://www.nuget.org/packages/Sats.PostgresDistributedCache/)
+
 
