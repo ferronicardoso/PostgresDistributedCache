@@ -64,6 +64,16 @@ public class MyService
     {
         await _distributedCache.RefreshAsync(key);
     }
+
+    public async Task<string?> GetStringFromCacheAsync(string key)
+    {
+        return await _distributedCache.GetStringAsync(key);
+    }
+
+    public async Task SetStringInCacheAsync(string key, string value, TimeSpan? expiration = null)
+    {
+        await _distributedCache.SetStringAsync(key, value, expiration);
+    }
 }
 ```
 
