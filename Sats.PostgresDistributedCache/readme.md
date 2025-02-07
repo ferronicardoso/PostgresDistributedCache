@@ -7,7 +7,7 @@ This is a custom distributed cache implementation using **PostgreSQL** as the ba
 To install the `Sats.PostgresDistributedCache` NuGet package, run the following command in your .NET project:
 
 ```bash
-dotnet add package Sats.PostgresDistributedCache --version 1.2.0
+dotnet add package Sats.PostgresDistributedCache --version 1.3.0
 ```
 
 Alternatively, you can use the NuGet Package Manager in Visual Studio.
@@ -54,6 +54,16 @@ public class MyService
         var data = Encoding.UTF8.GetBytes(value);
         await _distributedCache.SetAsync(key, data, expiration: TimeSpan.FromMinutes(10));
     }
+
+    public async Task RemoveFromCacheAsync(string key)
+    {
+        await _distributedCache.RemoveAsync(key);
+    }
+
+    public async Task RefreshCacheAsync(string key)
+    {
+        await _distributedCache.RefreshAsync(key);
+    }
 }
 ```
 
@@ -96,5 +106,3 @@ This package is licensed under the MIT License.
 ## Links
 
 - [NuGet Package](https://www.nuget.org/packages/Sats.PostgresDistributedCache/)
-
-
