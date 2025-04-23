@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using Sats.PostgresDistributedCache;
 
@@ -6,23 +7,55 @@ namespace Sats.PostgreSqlDistributedCache
 {
     public class PostgreSqlDistributedCache : IPostgreSqlDistributedCache
     {
-        private readonly string _connectionString;
+        private readonly PostgresDistributedCacheOptions _options;
 
         public PostgreSqlDistributedCache(string connectionString)
+            : this(new PostgresDistributedCacheOptions { ConnectionString = connectionString }) { }
+
+        public PostgreSqlDistributedCache(IOptions<PostgresDistributedCacheOptions> options)
         {
-            _connectionString = connectionString;
+            _options = options.Value;
         }
 
         private async Task<NpgsqlConnection> CreateOpenConnectionAsync(CancellationToken token)
         {
-            var connection = new NpgsqlConnection(_connectionString);
+            var connection = new NpgsqlConnection(_options.ConnectionString);
             await connection.OpenAsync(token);
+            
+            string checkTableQuery = $@"
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = @schema_name
+                    AND table_name = @table_name
+                )";
+        
+            await using var checkCmd = new NpgsqlCommand(checkTableQuery, connection);
+            checkCmd.Parameters.AddWithValue("schema_name", _options.SchemaName);
+            checkCmd.Parameters.AddWithValue("table_name", _options.TableName);
+        
+            bool tableExists = (bool)await checkCmd.ExecuteScalarAsync(token);
+        
+            if (!tableExists)
+            {
+                string createTableQuery = $@"
+                    CREATE TABLE IF NOT EXISTS {_options.SchemaName}.""{_options.TableName}"" (
+                        key character varying(255) NOT NULL,
+                        value bytea NOT NULL,
+                        expiration timestamp with time zone,
+                        CONSTRAINT pk_{_options.TableName} PRIMARY KEY (key),
+                        CONSTRAINT uq_{_options.TableName}_key UNIQUE (key)  
+                    )";
+        
+                await using var createCmd = new NpgsqlCommand(createTableQuery, connection);
+                await createCmd.ExecuteNonQueryAsync(token);
+            }
             return connection;
         }
 
         public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
         {
-            const string query = @"SELECT value FROM public.""Cache"" WHERE key = @key AND (expiration IS NULL OR expiration > @current_time)";
+            string query =
+                $@"SELECT value FROM {_options.SchemaName}.""{_options.TableName}"" WHERE key = @key AND (expiration IS NULL OR expiration > @current_time)";
 
             await using var connection = await CreateOpenConnectionAsync(token);
             await using var cmd = new NpgsqlCommand(query, connection);
@@ -35,8 +68,8 @@ namespace Sats.PostgreSqlDistributedCache
 
         public async Task SetAsync(string key, byte[] value, TimeSpan? expiration = null, CancellationToken token = default)
         {
-            const string query = @"
-                    INSERT INTO public.""Cache"" (key, value, expiration)
+            string query = $@"
+                    INSERT INTO {_options.SchemaName}.""{_options.TableName}"" (key, value, expiration)
                     VALUES (@key, @value, @expiration)
                     ON CONFLICT (key)
                     DO UPDATE SET value = @value, expiration = @expiration";
@@ -52,7 +85,7 @@ namespace Sats.PostgreSqlDistributedCache
 
         public async Task RemoveAsync(string key, CancellationToken token = default)
         {
-            const string query = "DELETE FROM public.\"Cache\" WHERE key = @key";
+            string query = $@"DELETE FROM {_options.SchemaName}.""{_options.TableName}"" WHERE key = @key";
 
             await using var connection = await CreateOpenConnectionAsync(token);
             await using var cmd = new NpgsqlCommand(query, connection);
@@ -63,7 +96,7 @@ namespace Sats.PostgreSqlDistributedCache
 
         public async Task RefreshAsync(string key, CancellationToken token = default)
         {
-            const string query = "UPDATE public.\"Cache\" SET expiration = @expiration WHERE key = @key";
+            string query = $@"UPDATE {_options.SchemaName}.""{_options.TableName}"" SET expiration = @expiration WHERE key = @key";
 
             await using var connection = await CreateOpenConnectionAsync(token);
             await using var cmd = new NpgsqlCommand(query, connection);

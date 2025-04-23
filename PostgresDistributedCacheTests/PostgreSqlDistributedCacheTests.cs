@@ -1,5 +1,3 @@
-
-
 using System.Text;
 using Sats.PostgreSqlDistributedCache;
 
@@ -7,11 +5,17 @@ namespace PostgresDistributedCacheTests;
 
 public class PostgreSqlDistributedCacheTests
 {
-    private readonly string _connectionString = "Server=127.0.0.1;Port=5432;Database=HIS;User Id=postgres;Password=satsvelke@7;";
-
     private PostgreSqlDistributedCache CreateCache()
     {
-        return new PostgreSqlDistributedCache(_connectionString);
+        var options = new PostgresDistributedCacheOptions
+        {
+            ConnectionString = "Server=127.0.0.1;Port=5432;Database=HIS;User Id=postgres;Password=satsvelke@7;",
+            // You can use any valid PostgreSQL schema name. Default is 'public', but you can create and use custom schemas
+            SchemaName = "public",
+            // You can use any table name like 'Cache' or 'cache' according to your preferences
+            TableName = "Cache"
+        };
+        return new PostgreSqlDistributedCache(options);
     }
 
     [Fact]

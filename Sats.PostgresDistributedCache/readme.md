@@ -82,13 +82,12 @@ public class MyService
 The cache is stored in a PostgreSQL table named `Cache` with the following schema:
 
 ```sql
-CREATE TABLE IF NOT EXISTS public."Cache"
-(
-    "key" character varying(255) NOT NULL,
-    "value" text NOT NULL,
-    "expiration" timestamp with time zone,
-    CONSTRAINT "PK_Cache" PRIMARY KEY ("key"),
-    CONSTRAINT "UQ_Cache_Key" UNIQUE ("key")
+CREATE TABLE IF NOT EXISTS public."Cache" (
+  key character varying(255) NOT NULL,
+  value bytea NOT NULL,
+  expiration timestamp with time zone,
+  CONSTRAINT PK_Cache PRIMARY KEY (key),
+  CONSTRAINT UQ_Cache_Key UNIQUE (key)  
 );
 ```
 
