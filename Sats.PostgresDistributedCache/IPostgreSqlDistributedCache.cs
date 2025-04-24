@@ -1,4 +1,3 @@
-
 namespace Sats.PostgresDistributedCache;
 
 public interface IPostgreSqlDistributedCache
