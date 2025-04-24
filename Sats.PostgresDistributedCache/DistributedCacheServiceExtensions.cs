@@ -25,6 +25,27 @@ namespace Sats.PostgreSqlDistributedCache
 
             return services;
         }
+
+        public static IServiceCollection AddPostgresDistributedCache(
+            this IServiceCollection services, Action<IServiceProvider, PostgresDistributedCacheOptions> configureOptions)
+        {
+            ArgumentNullException.ThrowIfNull(configureOptions);
+
+            services.AddSingleton<IPostgreSqlDistributedCache>(sp =>
+            {
+                var options = new PostgresDistributedCacheOptions();
+                configureOptions(sp, options);
+
+                if (string.IsNullOrEmpty(options.ConnectionString))
+                {
+                    throw new InvalidOperationException("PostgreSQL cache connection string is missing.");
+                }
+
+                return new PostgreSqlDistributedCache(options.ConnectionString!);
+            });
+
+            return services;
+        }
     }
 
     public class PostgresDistributedCacheOptions : IOptions<PostgresDistributedCacheOptions>
