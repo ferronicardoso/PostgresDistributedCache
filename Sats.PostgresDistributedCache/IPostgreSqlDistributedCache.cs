@@ -1,6 +1,8 @@
+using Microsoft.Extensions.Caching.Distributed;
+
 namespace Sats.PostgresDistributedCache;
 
-public interface IPostgreSqlDistributedCache
+public interface IPostgreSqlDistributedCache : IDistributedCache
 {
     Task<byte[]?> GetAsync(string key, CancellationToken token = default);
     Task SetAsync(string key, byte[] value, TimeSpan? expiration = null, CancellationToken token = default);
