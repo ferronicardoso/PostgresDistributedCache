@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using Sats.PostgresDistributedCache;
@@ -117,5 +118,18 @@ namespace Sats.PostgreSqlDistributedCache
             var encodedValue = Encoding.UTF8.GetBytes(value);
             await SetAsync(key, encodedValue, expiration, token);
         }
+        
+        public byte[]? Get(string key) => GetAsync(key).GetAwaiter().GetResult();
+
+        public void Set(string key, byte[] value, DistributedCacheEntryOptions options) =>
+            SetAsync(key, value, options).GetAwaiter().GetResult();
+
+        public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options,
+            CancellationToken token = new CancellationToken()) =>
+            SetAsync(key, value, options.AbsoluteExpirationRelativeToNow, token);
+
+        public void Refresh(string key) => RefreshAsync(key).GetAwaiter().GetResult();
+
+        public void Remove(string key) => RemoveAsync(key).GetAwaiter().GetResult();
     }
 }
