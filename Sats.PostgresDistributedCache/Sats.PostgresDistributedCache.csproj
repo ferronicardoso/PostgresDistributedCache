@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Sats.PostgresDistributedCache</PackageId>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <Authors>satsvelke</Authors>
     <Description>A PostgreSQL-based distributed cache implementation for .NET applications.</Description>
     <PackageTags>PostgreSQL, Distributed Cache, .NET</PackageTags>

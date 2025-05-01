@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sats.PostgresDistributedCache;
@@ -19,9 +20,13 @@ namespace Sats.PostgreSqlDistributedCache
                 throw new InvalidOperationException("PostgreSQL cache connection string is missing.");
             }
 
-            // Register the service with dependency injection
+            // Register the service with dependency injection as IPostgreSqlDistributedCache
             services.AddSingleton<IPostgreSqlDistributedCache>(sp =>
                 new PostgreSqlDistributedCache(options.ConnectionString!));
+
+            // Also register as IDistributedCache for standard interface usage
+            services.AddSingleton<IDistributedCache>(sp =>
+                sp.GetRequiredService<IPostgreSqlDistributedCache>());
 
             return services;
         }
@@ -43,6 +48,10 @@ namespace Sats.PostgreSqlDistributedCache
 
                 return new PostgreSqlDistributedCache(options.ConnectionString!);
             });
+
+            // Also register as IDistributedCache for standard interface usage
+            services.AddSingleton<IDistributedCache>(sp =>
+                sp.GetRequiredService<IPostgreSqlDistributedCache>());
 
             return services;
         }
@@ -67,8 +76,8 @@ namespace Sats.PostgreSqlDistributedCache
                 this.WriteConnectionString = value;
             }
         }
-    
-    
+
+
         public string ReadConnectionString { get; set; }
 
         public string WriteConnectionString { get; set; }
@@ -76,9 +85,9 @@ namespace Sats.PostgreSqlDistributedCache
         public string SchemaName { get; set; } = "public";
 
         public string TableName { get; set; } = "Cache";
-    
+
         public TimeSpan DefaultSlidingExpiration { get; set; } = TimeSpan.FromMinutes(20.0);
-    
+
         public PostgresDistributedCacheOptions Value
         {
             get
